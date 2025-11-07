@@ -1,5 +1,6 @@
 package proyecto_final;
 
+//HOLA MUNDO
 /*
  *      Compile: javac -d bin -sourcepath src src/edu/uabc/erdl/proyecto_final/*.java
  *      Eject:   java -cp bin edu.uabc.erdl.proyecto_final.Main
