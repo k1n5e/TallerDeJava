@@ -1,10 +1,8 @@
-package proyecto_final;
-
-//HOLA MUNDO
+package edu.uabc.AEFC.Proyecto;
 
 /*
- *      Compile: javac -d bin -sourcepath proyecto_final/*.java
- *      Eject:   java -cp bin proyecto_final.Main
+ *      Compile: javac -d bin -sourcepath src src/edu/uabc/erdl/proyecto_final/*.java
+ *      Eject:   java -cp bin edu.uabc.erdl.proyecto_final.Main
  */
 
 import java.util.*;

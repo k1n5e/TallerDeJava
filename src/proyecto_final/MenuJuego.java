@@ -1,10 +1,9 @@
-package proyecto_final;
+package edu.uabc.AEFC.Proyecto;
 
-import java.util.*;
+import java.util.List;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
-import javax.swing.event.*;
 
 public class MenuJuego extends JPanel implements ActionListener, FocusListener {
     private App app;
@@ -12,6 +11,7 @@ public class MenuJuego extends JPanel implements ActionListener, FocusListener {
     private JLabel info_lbl;
     private JButton crearSala_btn;
     private JButton unirseJuego_btn;
+    private JButton verSalas_btn;
     private JButton cerrar_btn;
     private JLabel mensaje_lbl;
     public GridBagConstraints gbc;
@@ -71,8 +71,20 @@ public class MenuJuego extends JPanel implements ActionListener, FocusListener {
         unirseJuego_btn.addFocusListener(this);
         add(unirseJuego_btn, gbc);
 
-        // boton cerrar sesión
-        gbc.gridy = 4;
+        // boton ver salas
+        gbc.gridy = 5;
+        gbc.gridx = 0;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.CENTER;
+        verSalas_btn = new JButton("Salas Disponibles");
+        verSalas_btn.setFont(font);
+        verSalas_btn.setActionCommand("VerSalas");
+        verSalas_btn.addActionListener(this);
+        verSalas_btn.addFocusListener(this);
+        add(verSalas_btn, gbc);
+
+        // boton cerrar sesion
+        gbc.gridy = 6;
         gbc.gridx = 0;
         gbc.gridwidth = 1;
         gbc.anchor = GridBagConstraints.LINE_START;
@@ -84,7 +96,7 @@ public class MenuJuego extends JPanel implements ActionListener, FocusListener {
         add(cerrar_btn, gbc);
 
         // boton salir
-        gbc.gridy = 4;
+        gbc.gridy = 6;
         gbc.gridx = 1;
         gbc.gridwidth = 1;
         gbc.anchor = GridBagConstraints.LINE_END;
@@ -96,7 +108,7 @@ public class MenuJuego extends JPanel implements ActionListener, FocusListener {
         add(salir_btn, gbc);
 
         // mensaje
-        gbc.gridy = 5;
+        gbc.gridy = 7;
         gbc.gridx = 0;
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.CENTER;
@@ -130,11 +142,15 @@ public class MenuJuego extends JPanel implements ActionListener, FocusListener {
 
         switch (command) {
             case "CrearSala":
-
+                crearSala();
                 break;
 
             case "UnirseJuego":
+                unirseASala();
+                break;
 
+            case "VerSalas":
+                app.setSalasDisponibles();
                 break;
 
             case "Cerrar":
@@ -143,8 +159,88 @@ public class MenuJuego extends JPanel implements ActionListener, FocusListener {
                 break;
 
             case "Salir":
+                int quest = JOptionPane.showConfirmDialog(this,
+                        "El programa se cerrara, ¿esta seguro?",
+                        "Confirmar salida",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.QUESTION_MESSAGE);
 
+                if (quest == JOptionPane.YES_OPTION) {
+                    System.exit(0);
+                }
                 break;
+        }
+    }
+
+    // mtodos
+    private void crearSala() {
+        JPanel panel = new JPanel(new GridLayout(3, 2, 10, 10));
+        JTextField capacidadField = new JTextField("4");
+        JPasswordField passwordField = new JPasswordField();
+        JCheckBox privadaCheck = new JCheckBox("Sala privada");
+
+        panel.add(new JLabel("Capacidad: "));
+        panel.add(capacidadField);
+        panel.add(new JLabel("Contrsena: "));
+        panel.add(passwordField);
+        panel.add(new JLabel(""));
+        panel.add(privadaCheck);
+
+        int result = JOptionPane.showConfirmDialog(this, panel, "Crear Nueva Sala", JOptionPane.OK_CANCEL_OPTION);
+
+        if (result == JOptionPane.OK_OPTION) {
+            try {
+                int capacidad = Integer.parseInt(capacidadField.getText());
+                String contrasena = privadaCheck.isSelected() ? new String(passwordField.getPassword()) : "";
+
+                if (capacidad < 2 || capacidad > 8) {
+                    mostrarMensaje("La capacidad debe estar entre 2 y 8 jugadores.", true);
+                    return;
+                }
+
+                Sala nuevaSala = app.crearSala(contrasena, capacidad);
+                mostrarMensaje("Sala " + nuevaSala.getNumeroSala() + " creada.", false);
+                app.setMapa(nuevaSala);
+            } catch (NumberFormatException ex) {
+                mostrarMensaje("Capacidad invalida", true);
+            }
+        }
+    }
+
+    private void unirseASala() {
+        String numeroSalaStr = JOptionPane.showInputDialog(this,
+                "Numero de sala: ",
+                "Unirse a Sala",
+                JOptionPane.QUESTION_MESSAGE);
+
+        if (numeroSalaStr != null && !numeroSalaStr.trim().isEmpty()) {
+            try {
+                int numeroSala = Integer.parseInt(numeroSalaStr);
+                Sala sala = app.getGestorSalas().buscarSala(numeroSala);
+
+                if (sala == null) {
+                    mostrarMensaje("Sala no encontrada", true);
+                    return;
+                }
+
+                String contrasena = "";
+                if (sala.isEsPrivada()) {
+                    contrasena = JOptionPane.showInputDialog(this,
+                            "Sala privada", "Contrasena requerida", JOptionPane.QUESTION_MESSAGE);
+                    if (contrasena == null) {
+                        return;
+                    }
+                }
+
+                if (app.unirseASala(numeroSala, contrasena)) {
+                    mostrarMensaje("Te has unido a la sala " + numeroSala, false);
+                    app.setMapa(sala);
+                } else {
+                    mostrarMensaje("No fue posible hacer la operacion. Verifique la informacion.", true);
+                }
+            } catch (NumberFormatException ex) {
+                mostrarMensaje("Numero de sala invalido", true);
+            }
         }
     }
 

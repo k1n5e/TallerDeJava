@@ -1,4 +1,4 @@
-package proyecto_final;
+package edu.uabc.AEFC.Proyecto;
 
 import java.util.Objects;
 import java.io.Serializable;
